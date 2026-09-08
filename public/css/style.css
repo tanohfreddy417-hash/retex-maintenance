@@ -27,6 +27,23 @@ body {
 }
 a { color: inherit; }
 
+/* logo AUPCN en filigrane sur toutes les pages */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('/img/logo-aupcn.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: min(600px, 74vw);
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 0;
+}
+.app-shell, .login-wrap { position: relative; z-index: 1; }
+/* sur la page de connexion (fond vert foncé), logo en blanc pour rester visible */
+body:has(.login-wrap)::before { filter: brightness(0) invert(1); opacity: 0.09; background-size: min(460px, 80vw); }
+
 .app-shell { display: flex; min-height: 100vh; }
 .sidebar {
   width: 248px; flex-shrink: 0; background: var(--sidebar-bg); color: var(--sidebar-text);
@@ -132,13 +149,6 @@ tr.clickable-row:hover { background: #f7f9f5; }
 }
 .pill-info .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
 
-/* filigrane AUPCN en fond du tableau de bord */
-.dash-watermark {
-  position: absolute; inset: 0; background-image: var(--wm, none);
-  background-repeat: no-repeat; background-position: center 120px; background-size: 480px auto;
-  opacity: 0.05; pointer-events: none; z-index: 0;
-}
-#tab-dashboard { position: relative; z-index: 1; }
 
 /* login */
 .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, var(--sidebar-bg), #071a10); padding: 20px; }
