@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RETEX Maintenance — Connexion</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <img class="login-logo" src="/img/logo-aupcn.png" alt="AUPCN" onerror="this.style.display='none'">
+    <div style="font-weight:800;font-size:15px;">RETEX Maintenance</div>
+    <div style="font-size:10.5px;color:var(--muted);letter-spacing:.06em;font-weight:600;margin-bottom:6px;">AUPCN — RETOURS D'EXPÉRIENCE INTER-USINES</div>
+
+    <!-- CONNEXION -->
+    <form id="loginForm">
+      <h1>Connexion</h1>
+      <p class="sub">Entrez votre identifiant et votre mot de passe.</p>
+      <label for="l_username">Identifiant</label>
+      <input id="l_username" autocomplete="username" required>
+      <label for="l_password">Mot de passe</label>
+      <input id="l_password" type="password" autocomplete="current-password" required>
+      <div class="error-msg" id="loginError" style="display:none;"></div>
+      <button type="submit">Se connecter</button>
+      <div class="login-toggle">Pas encore de compte ? <a id="showRegister">Créer un accès</a></div>
+    </form>
+
+    <!-- INSCRIPTION -->
+    <form id="registerForm" style="display:none;">
+      <h1>Créer un accès</h1>
+      <p class="sub">Votre mot de passe par défaut sera votre identifiant suivi de <strong>1234</strong>. Vous pourrez le changer ensuite.</p>
+      <label for="r_nom">Nom complet</label>
+      <input id="r_nom" required>
+      <label for="r_entreprise">Entreprise / usine</label>
+      <input id="r_entreprise" required placeholder="Ex: SAPH Toupah, TRCI, SOGB...">
+      <label for="r_username">Identifiant souhaité</label>
+      <input id="r_username" placeholder="laissé vide = généré depuis votre nom">
+      <div class="error-msg" id="registerError" style="display:none;"></div>
+      <div class="success-msg" id="registerSuccess" style="display:none;"></div>
+      <button type="submit">Créer mon accès</button>
+      <div class="login-toggle">Déjà un compte ? <a id="showLogin">Se connecter</a></div>
+    </form>
+  </div>
+</div>
+
+<script>
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+document.getElementById('showRegister').onclick = () => { loginForm.style.display = 'none'; registerForm.style.display = ''; };
+document.getElementById('showLogin').onclick = () => { registerForm.style.display = 'none'; loginForm.style.display = ''; };
+
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('loginError');
+  err.style.display = 'none';
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: document.getElementById('l_username').value.trim(),
+        password: document.getElementById('l_password').value
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) { err.textContent = data.error || 'Erreur'; err.style.display = 'block'; return; }
+    window.location.href = '/app.html';
+  } catch (e2) { err.textContent = 'Impossible de contacter le serveur'; err.style.display = 'block'; }
+});
+
+registerForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('registerError');
+  const ok = document.getElementById('registerSuccess');
+  err.style.display = 'none'; ok.style.display = 'none';
+  try {
+    const res = await fetch('/api/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nom_complet: document.getElementById('r_nom').value.trim(),
+        entreprise: document.getElementById('r_entreprise').value.trim(),
+        username: document.getElementById('r_username').value.trim()
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) { err.textContent = data.error || 'Erreur'; err.style.display = 'block'; return; }
+    ok.innerHTML = `Accès créé ! Identifiant : <strong>${data.username}</strong> — Mot de passe : <strong>${data.mot_de_passe}</strong>. Connectez-vous puis changez-le.`;
+    ok.style.display = 'block';
+    document.getElementById('l_username').value = data.username;
+    setTimeout(() => { registerForm.style.display = 'none'; loginForm.style.display = ''; }, 4000);
+  } catch (e2) { err.textContent = 'Impossible de contacter le serveur'; err.style.display = 'block'; }
+});
+</script>
+</body>
+</html>

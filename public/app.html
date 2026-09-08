@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RETEX Maintenance — AUPCN</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img class="brand-logo" src="/img/logo-aupcn.png" alt="AUPCN" onerror="this.style.display='none'">
+      <div>
+        <div class="brand-title">RETEX Maintenance</div>
+        <div class="brand-sub">AUPCN — INTER-USINES</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-tab="nouveau"><span class="nav-icon">📝</span> Nouveau retour</button>
+      <button class="nav-item" data-tab="dashboard"><span class="nav-icon">📊</span> Tableau de bord</button>
+      <button class="nav-item" data-tab="bibliotheque"><span class="nav-icon">📚</span> Bibliothèque</button>
+      <button class="nav-item" id="changePasswordBtn"><span class="nav-icon">⚙️</span> Mon mot de passe</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user-name" id="userName"></div>
+      <div class="sidebar-user-sub" id="userEntreprise"></div>
+      <button class="secondary" id="logoutBtn">Déconnexion</button>
+    </div>
+  </aside>
+
+  <main class="app-main">
+    <div class="container">
+
+      <!-- NOUVEAU RETOUR -->
+      <div id="tab-nouveau">
+        <div class="page-header">
+          <div>
+            <h1>Nouveau retour d'expérience</h1>
+            <p class="page-sub">Décrivez un problème rencontré dans votre usine et comment il a été résolu. Ces retours alimentent la bibliothèque commune et le tableau de bord du groupe.</p>
+          </div>
+        </div>
+        <div class="card">
+          <form id="retourForm">
+            <div class="grid-3">
+              <div>
+                <label for="f_date">Date de l'intervention</label>
+                <input type="date" id="f_date" required>
+              </div>
+              <div>
+                <label for="f_entreprise">Entreprise / usine</label>
+                <input id="f_entreprise" required>
+              </div>
+              <div>
+                <label for="f_criticite">Criticité</label>
+                <select id="f_criticite"></select>
+              </div>
+            </div>
+            <div class="grid-3">
+              <div>
+                <label for="f_equipement">Équipement concerné</label>
+                <input id="f_equipement" required placeholder="Ex: Pompe alimentation P3, Crêpeuse N°2...">
+              </div>
+              <div>
+                <label for="f_type">Type d'équipement</label>
+                <select id="f_type" required><option value="">— Choisir —</option></select>
+              </div>
+              <div>
+                <label for="f_zone">Zone / atelier <span class="muted">(optionnel)</span></label>
+                <input id="f_zone">
+              </div>
+            </div>
+            <label for="f_probleme">Problème rencontré</label>
+            <textarea id="f_probleme" required placeholder="Symptômes, circonstances, ce qui a été constaté..."></textarea>
+            <label for="f_cause">Cause identifiée <span class="muted">(optionnel)</span></label>
+            <textarea id="f_cause"></textarea>
+            <label for="f_solution">Solution appliquée</label>
+            <textarea id="f_solution" required placeholder="Ce qui a été fait pour remettre l'équipement en état, étape par étape..."></textarea>
+            <div class="grid-3">
+              <div>
+                <label for="f_pieces">Pièces utilisées <span class="muted">(optionnel)</span></label>
+                <input id="f_pieces" placeholder="Ex: Roulement 6308, courroie B120...">
+              </div>
+              <div>
+                <label for="f_temps">Temps de remise en état (minutes)</label>
+                <input type="number" min="0" id="f_temps">
+              </div>
+              <div>
+                <label for="f_cout">Coût de la réparation (FCFA) <span class="muted">(optionnel)</span></label>
+                <input type="number" min="0" id="f_cout">
+              </div>
+            </div>
+            <div class="checkline">
+              <input type="checkbox" id="f_recurrent">
+              <label for="f_recurrent" style="margin:0;font-weight:500;color:var(--text);">Problème déjà rencontré auparavant (récurrent)</label>
+            </div>
+            <div class="error-msg" id="retourError" style="display:none;"></div>
+            <div class="success-msg" id="retourSuccess" style="display:none;"></div>
+            <button type="submit">Enregistrer le retour</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- TABLEAU DE BORD -->
+      <div id="tab-dashboard" style="display:none;">
+        <div class="dash-watermark"></div>
+        <div class="page-header">
+          <div>
+            <h1>Tableau de bord du groupe</h1>
+            <p class="page-sub">Synthèse de tous les retours reçus des usines de l'association.</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <span class="pill-info"><span class="dot"></span> <span id="dashUpdated">—</span></span>
+            <button class="secondary" id="exportBtn">Exporter (Excel/CSV)</button>
+          </div>
+        </div>
+
+        <div class="stat-cards">
+          <div class="stat-card"><div class="label">Retours enregistrés</div><div class="value" id="kTotal">-</div></div>
+          <div class="stat-card c-blue"><div class="label">Usines contributrices</div><div class="value" id="kEntreprises">-</div></div>
+          <div class="stat-card c-blue"><div class="label">Contributeurs</div><div class="value" id="kContributeurs">-</div></div>
+          <div class="stat-card c-orange"><div class="label">Temps moyen de remise en état</div><div class="value" id="kTemps">-</div></div>
+          <div class="stat-card c-orange"><div class="label">Coût moyen (si renseigné)</div><div class="value" id="kCout">-</div></div>
+          <div class="stat-card c-red"><div class="label">Problèmes récurrents</div><div class="value" id="kRecurrents">-</div></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="chart-box"><h3>Retours par usine</h3><svg id="chEntreprise" width="100%" height="240"></svg></div>
+          <div class="chart-box"><h3>Temps moyen de remise en état par type d'équipement</h3><svg id="chTempsType" width="100%" height="240"></svg></div>
+          <div class="chart-box">
+            <h3>Répartition par type d'équipement</h3>
+            <div class="donut-wrap"><svg id="chType" width="180" height="180"></svg><div class="donut-legend" id="legType"></div></div>
+          </div>
+          <div class="chart-box">
+            <h3>Répartition par criticité</h3>
+            <div class="donut-wrap"><svg id="chCriticite" width="180" height="180"></svg><div class="donut-legend" id="legCriticite"></div></div>
+          </div>
+          <div class="chart-box" style="grid-column:1/-1;"><h3>Équipements les plus cités (toutes usines)</h3><svg id="chTopEquip" width="100%" height="260"></svg></div>
+        </div>
+      </div>
+
+      <!-- BIBLIOTHÈQUE -->
+      <div id="tab-bibliotheque" style="display:none;">
+        <div class="page-header">
+          <div>
+            <h1>Bibliothèque des retours</h1>
+            <p class="page-sub">Recherchez un problème déjà rencontré ailleurs et consultez la solution appliquée.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="filters-bar">
+            <div><label>Recherche</label><input type="text" id="b_q" placeholder="Mot-clé : roulement, fuite, disjoncteur..."></div>
+            <div><label>Usine</label><select id="b_entreprise"><option value="">Toutes</option></select></div>
+            <div><label>Type d'équipement</label><select id="b_type"><option value="">Tous</option></select></div>
+            <div><label>Criticité</label><select id="b_criticite"><option value="">Toutes</option></select></div>
+            <div style="flex:0;"><button id="b_search">Filtrer</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-scroll">
+            <table>
+              <thead><tr>
+                <th>Date</th><th>Usine</th><th>Équipement</th><th>Type</th><th>Criticité</th>
+                <th class="wrap">Problème</th><th>Temps</th><th>Par</th>
+              </tr></thead>
+              <tbody id="biblioBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="/js/common.js"></script>
+<script src="/js/charts.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
